@@ -5,7 +5,7 @@ A fork of https://github.com/austintgriffith/scaffold-eth.git
 ## to run
 
 ```bash 
-git clone https://github.com/austintgriffith/scaffold-eth.git todo
+git clone https://github.com/Nosagie/TodoList.git todo
 
 cd todo
 ```
