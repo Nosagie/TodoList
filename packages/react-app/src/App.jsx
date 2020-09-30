@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import "antd/dist/antd.css";
 import { getDefaultProvider, InfuraProvider, JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 import "./App.css";
+import TODO from "./TODO.js";
 import { Row, Col, Button, List } from "antd";
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
@@ -76,7 +77,7 @@ function App() {
   console.log("📝 readContracts",readContracts)
 
   // keep track of a variable from the contract in the local React state:
-  const purpose = useContractReader(readContracts,"YourContract", "purpose")
+  const purpose = useContractReader(readContracts,"ToDos", "purpose")
   console.log("🤗 purpose:",purpose)
 
   // If you want to make 🔐 write transactions to your contracts, use the userProvider:
@@ -84,7 +85,7 @@ function App() {
   console.log("🔐 writeContracts",writeContracts)
 
   //📟 Listen for broadcast events
-  const setPurposeEvents = useEventListener(readContracts, "YourContract", "SetPurpose", localProvider, 1);
+  const setPurposeEvents = useEventListener(readContracts, "ToDos", "SetPurpose", localProvider, 1);
   console.log("📟 SetPurpose events:",setPurposeEvents)
 
   const loadWeb3Modal = useCallback(async () => {
@@ -110,11 +111,28 @@ function App() {
           and give you a form to interact with it locally
       */}
       <Contract
-        name="YourContract"
+        name="ToDos"
         signer={userProvider.getSigner()}
         provider={localProvider}
         address={address}
         blockExplorer={blockExplorer}
+      />
+      <Contract
+        name="Margs"
+        signer={userProvider.getSigner()}
+        provider={localProvider}
+        address={address}
+        blockExplorer={blockExplorer}
+      />
+
+      <TODO
+        signer={userProvider.getSigner()}
+        provider={localProvider}
+        address={address}
+        readContracts={readContracts}
+        writeContracts={writeContracts}
+        price={price}
+        gasPrice={gasPrice}
       />
 
 
@@ -128,7 +146,7 @@ function App() {
         <div style={{margin:8}}>
           <Button onClick={()=>{
             /* look how you call setPurpose on your contract: */
-            tx( writeContracts.YourContract.setPurpose("🐖 Don't hog the block!") )
+            tx( writeContracts.ToDos.setPurpose("🐖 Don't hog the block!") )
           }}>Set Purpose</Button>
         </div>
 
@@ -139,7 +157,7 @@ function App() {
               here we are sending value straight to the contract's address:
             */
             tx({
-              to: writeContracts.YourContract.address,
+              to: writeContracts.ToDos.address,
               value: parseEther("0.001")
             });
             /* this should throw an error about "no fallback nor receive function" until you add it */
@@ -149,7 +167,7 @@ function App() {
         <div style={{margin:8}}>
           <Button onClick={()=>{
             /* look how we call setPurpose AND send some value along */
-            tx( writeContracts.YourContract.setPurpose("💵 Paying for this one!",{
+            tx( writeContracts.ToDos.setPurpose("💵 Paying for this one!",{
               value: parseEther("0.001")
             }))
             /* this will fail until you make the setPurpose function payable */
@@ -161,9 +179,9 @@ function App() {
           <Button onClick={()=>{
             /* you can also just craft a transaction and send it to the tx() transactor */
             tx({
-              to: writeContracts.YourContract.address,
+              to: writeContracts.ToDos.address,
               value: parseEther("0.001"),
-              data: writeContracts.YourContract.interface.encodeFunctionData("setPurpose(string)",["🤓 Whoa so 1337!"])
+              data: writeContracts.ToDos.interface.encodeFunctionData("setPurpose(string)",["🤓 Whoa so 1337!"])
             });
             /* this should throw an error about "no fallback nor receive function" until you add it */
           }}>Another Example</Button>
@@ -193,7 +211,7 @@ function App() {
       </div>
 
       {/* 👨‍💼 Your account is in the top right with a wallet at connect options */}
-      <div style={{ position: "fixed", textAlign: "right", right: 0, top: 0, padding: 10 }}>
+      <div style={{ position: "fixed", textAlign: "right", right: 0, top: 30, padding: 10 }}>
          <Account
            address={address}
            localProvider={localProvider}
@@ -207,9 +225,7 @@ function App() {
          />
       </div>
 
-      {/* 🗑 Throw these away once you have 🏗 scaffold-eth figured out: */}
-      <Hints address={address} yourLocalBalance={yourLocalBalance} price={price} mainnetProvider={mainnetProvider} />
-
+    
       {/* 🗺 Extra UI like gas price, eth price, faucet, and support: */}
        <div style={{ position: "fixed", textAlign: "left", left: 0, bottom: 20, padding: 10 }}>
          <Row align="middle" gutter={[4, 4]}>
@@ -239,7 +255,6 @@ function App() {
          <Row align="middle" gutter={[4, 4]}>
            <Col span={24}>
              {
-
                /*  if the local provider has a signer, let's show the faucet:  */
                localProvider && localProvider.connection && localProvider.connection.url && localProvider.connection.url.indexOf("localhost")>=0 && !process.env.REACT_APP_PROVIDER && price > 1 ? (
                  <Faucet localProvider={localProvider} price={price} ensProvider={mainnetProvider}/>
