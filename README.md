@@ -1,4 +1,4 @@
-This was built with # 🏗 scaffold-eth
+This is a todo list dapp, built with # 🏗 scaffold-eth
 
 A fork of https://github.com/austintgriffith/scaffold-eth.git 
 
